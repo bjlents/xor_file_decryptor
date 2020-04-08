@@ -30,7 +30,7 @@ def create_xord_file(input_file, output_file, byte_to_xor):
     open(output_file, 'wb').write(input_file_as_bytes)
     file_type = magic.from_file(output_file)
     if file_type != "data":
-        logger.info(f"XORing with the byte '{byte_to_xor}' created a '{file_type}' file!")
+        logger.info(f"XORing with the byte '{hex(byte_to_xor).upper()}' created a '{file_type}' file!")
 
 def validate_input_file(input_file):
     """
