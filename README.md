@@ -3,19 +3,19 @@
 A useful tool for decrypting files that have been XOR'd.
 Created by Winning117 for CTF competitions.
 
-**Prerequisites:**<br>
+# Prerequisites:
 `sudo apt install python3-pip`<br>
 `pip3 install coloredlogs python-magic`<br>
 
-**Specific byte mode:**<br>
+# Specific byte mode:
 `python3 file_xor.py -f unknown.txt -b 0x89`<br>
 This will xor every byte in the file unknown.txt with the byte 0x89. This is useful for when you already know the byte ahead of time.<br>
 
-**Brute force mode:**<br>
+# Brute force mode:
 `python3 file_xor.py -f unknown.txt`<br>
 This will try every byte value and output files to a folder named `xord_output` within this file directory.<br>
 
-**Arguments:**<br>
+# Arguments:
 -f or --filename<br>
 Use this argument to specify the input file. This argument is required.<br>
 
