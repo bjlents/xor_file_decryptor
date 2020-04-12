@@ -20,9 +20,9 @@ def setup_logger():
     coloredlogs.install(level='DEBUG', milliseconds=True) # the level specified here sets what level logs will be shown in the console
     return logger
 
-def create_xord_file(input_file, output_file, byte_to_xor):
+def create_xord_file(input_file, output_file, byte_to_xor, decimal_format):
     """
-    Creates an XOR'd file by XORing it with the specified byte (byte is in hex)
+    Creates an XOR'd file by XORing it with the specified byte
     """
     input_file_as_bytes = bytearray(open(input_file, 'rb').read())
     for i in range(len(input_file_as_bytes)):
@@ -30,7 +30,10 @@ def create_xord_file(input_file, output_file, byte_to_xor):
     open(output_file, 'wb').write(input_file_as_bytes)
     file_type = magic.from_file(output_file)
     if file_type != "data":
-        logger.info(f"XORing with the byte '{hex(byte_to_xor).upper()}' created a '{file_type}' file!")
+        if decimal_format:
+            logger.info(f"XORing with the byte '{byte_to_xor}' created a '{file_type}' file!")
+        else:
+            logger.info(f"XORing with the byte '{hex(byte_to_xor).upper()}' created a '{file_type}' file!")
 
 def validate_input_file(input_file):
     """
@@ -47,7 +50,7 @@ def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('-f', "--filename", required=True, help="The file to be XOR'd")
     parser.add_argument('-b', "--byte", help="The byte to XOR the file by, accepts either decimal 1-255 or hex 0x01 to 0xFF. If not specified then all bytes will be tried.")
-    parser.add_argument('-o', "--outputfile", help="The name of the file to output to")
+    parser.add_argument('-d', "--decimal", help="If toggled on then the output files will end in decimal instead of hex.", action='store_true')
     args = parser.parse_args()
 
     location_of_file_to_xor = validate_input_file(args.filename)
@@ -63,7 +66,7 @@ def main():
     os.mkdir(output_folder)
     logger.debug(f"Successfully created a folder for output at '{output_folder}'...")
 
-    if args.byte:
+    if args.byte: # if a specific byte is specified
         byte_as_string = args.byte
         byte_as_decimal = None
         if byte_as_string.startswith("0x"):
@@ -84,19 +87,24 @@ def main():
         xord_file_name = os.path.join(output_folder, xord_file_name)
 
         logger.info(f"XORing the file '{location_of_file_to_xor}' by the byte '{byte_as_string}'...")
-        create_xord_file(input_file=location_of_file_to_xor, output_file=xord_file_name, byte_to_xor=byte_as_decimal)
+        create_xord_file(input_file=location_of_file_to_xor, output_file=xord_file_name, byte_to_xor=byte_as_decimal, decimal_format=args.decimal)
         logger.info(f"Successfully output to the file '{xord_file_name}'.")
-    else:
+    else: # if a specific byte wasn't specified
         logger.info("A specific byte wasn't specified, so we're going to brute force it...")
         for num in range(1, 256):
-            if "." in args.filename:
-                xord_file_name = args.filename.split(".")[0] + "_xor_" + str(num)
+            if "." in args.filename: # remove the file extension if it exists
+                if args.decimal:
+                    xord_file_name = args.filename.split(".")[0] + "_xor_" + str(num)
+                else:
+                    xord_file_name = args.filename.split(".")[0] + "_xor_" + hex(num).upper()
             else:
-                xord_file_name = args.filename + "_xor_" + str(num)
+                if args.decimal:
+                    xord_file_name = args.filename + "_xor_" + str(num)
+                else:
+                    xord_file_name = args.filename.split(".")[0] + "_xor_" + hex(num).upper()
             xord_file_name = os.path.join(output_folder, xord_file_name)
-            create_xord_file(input_file=location_of_file_to_xor, output_file=xord_file_name, byte_to_xor=num)
+            create_xord_file(input_file=location_of_file_to_xor, output_file=xord_file_name, byte_to_xor=num, decimal_format=args.decimal)
         logger.info(f"Successfully created 255 files in '{output_folder}'.")
-
 
 if __name__ == "__main__":
     main()
